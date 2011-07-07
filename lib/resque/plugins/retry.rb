@@ -94,7 +94,14 @@ module Resque
       #
       # @return [Array] new job arguments
       def args_for_retry(*args)
-        args
+        # Added to make this plugin compatible with resque-access_worker_from_job. This cuts
+        # off the last argument (the worker) which doesn't need to get passed back in to the job for retry.
+        # Otherwise it'll keep failing and keep tacking on more worker arguments.
+        if args[-1].kind_of?(Resque::Worker)
+          args[0..-2]
+        else
+          args
+        end
       end
 
       # Convenience method to test whether you may retry on a given exception.
